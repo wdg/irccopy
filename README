@@ -1,4 +1,22 @@
 README FILE
 
+Hi, 
+this version got some bugs like:
+ - copy's directly but sends them not directly to the other server then you must type something in the other channel... 
+ - memory usage is higher than i want
 
-USAGE COMES LATER :)
+you allway's can help ;)
+
+Way one:
+ -> new issue (the issue)
+    ^desc: (code improvement paste here)
+
+Way two:
+ -> Fork
+ -> Edit....
+ -> Pull req.
+
+==============================================
+==     If you like this and want help?       =
+== Ask it (issue) or email to github@wdgp.nl =
+==============================================
