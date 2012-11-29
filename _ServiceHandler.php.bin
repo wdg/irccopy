@@ -1,0 +1,389 @@
+<?php
+/*
+link            services.woc
+{
+	username	*;
+	hostname 	82.95.199.96;
+	bind-ip 	*;
+	port 		  6667;
+	hub             *;
+	password-connect "bl44t";
+	password-receive "bl44t";
+	class           servers;
+		options {
+		};
+};
+
+
+ulines {
+	services.woc;
+};
+*/
+  error_reporting(E_ALL);    // alle error`s laten zien
+  set_time_limit(0);         // neem alle tijd
+  ob_implicit_flush();       // Voor Connectie stabiliteit
+  define('nl',"\n");         // newline
+
+if ( function_exists ( "date_default_timezone_set" ) && function_exists ( "date_default_timezone_get" ) ) {
+ date_default_timezone_set( date_default_timezone_get( ) ) ; ///php5 date error?
+}
+
+$admins = array("wes","wesdegroot","wdg","DevilShadow","w_z","Selina"); //de admins
+
+$conf = array(
+  "debug"           => true, //false, //leve it alone :P, off (=false);
+  "pass"            => "bl44t",
+  "sserver"         => "services.woc",
+  "IP"              => "84.31.40.247",
+  "server"          => "84.31.40.247",
+  "port"            => "6667",
+  "network"         => "world-of-crime.nl",
+  "rssname"         => "Fok!",
+  "rssurl"          => "http://rss.fok.nl/feeds/nieuws",
+  "protectnick"     => false,
+  "protectnickpass" => false,
+//"rssname"         => "Xjsite.nl", // Bye!
+//"rssurl"          => "http://www.xjsite.nl/Support/index.php?act=rssout&id=1", //F?UCK U
+  "ver"             => "1.5.0.0.02", // do not edit
+  "maxtime"         => "10"
+);
+
+
+function isadmin($nick = 'noadmin',$command = false) { //is een admin?
+ global $admins;
+ if(in_array($nick,$admins)) {
+  return true;
+ }else{
+  return false;
+ }
+}
+
+function makeuser($nick) {
+global $conf;
+$ctime=time();
+send("SQLINE Service :reserved 4 WesDeGroot Service\n");
+$rando  = rand(1,5) . rand(1,5) . rand(1,5) . rand(1,5) . rand(1,5);
+$arrayw = array("nl","com","eu","co.au","de","it","net","nu","info","be","us","tk");
+$exz    = $arrayw[rand(0,sizeof($arrayw)-1)];
+send("nick {$nick} 1 {$ctime} {$nick} host{$rando}.{$exz} {$conf['sserver']} {$ctime} :WesDeGroot`s PHP Service\n");
+echo "Qlined {$nick}".nl."Maked User \"{$nick}\"".nl;
+send(":{$nick} MODE {$nick} +Sq\n");
+}
+
+if(!extension_loaded('sockets')) {
+ if(!dl('php_sockets.dll')) {
+  exit("Error While Loading DLL"); //socket dll ?
+ }
+}
+
+$sa=array();
+  
+echo "starting bot..." . nl .
+     "connecting to: " . $conf['server'] .
+     nl . "port: " . $conf['port'] . nl;
+
+  if(!($socket = @fsockopen($conf['IP'], $conf['port'],$conf['maxtime']))) {
+   exit("can`t connect");
+  }
+  // Send auth info
+  
+
+  
+  send("PASS :" . $conf['pass']);
+  send("PROTOCTL NOQUIT");
+  send("SERVER " . $conf['sserver'] . " 1 :WesDeGroot Php Services Server");
+function iferror( $error=false, $param2=false, $prm3=false) {
+ exit ("exitting...");
+}
+
+function debug ( $array ) {
+ echo " Debug Array" . nl;
+ print_r($array);
+ echo "EOF" . nl . nl;
+}
+
+//NONO //define('ALL','$' . $conf['network']);
+
+function send($txt) {
+  global $socket,$conf;
+  fputs($socket,$txt . nl);
+  if ( $conf['debug'] == true ) {
+   echo "-> " . $txt . nl;
+  }
+}
+
+function sendto($nick,$message,$what='NOTICE') {
+ send(":Service ".$what." ".$nick." :".$message);
+}
+
+function svsnick($nick,$to) {
+ send("SVSNICK " . $nick . " " . $to . " :".time());
+}
+
+function sglobal($txt,$usr="GlobalService") {
+  send(":{$usr} NOTICE " . ALL . " :" . $txt);
+}
+
+define('2','2'); //no error :)
+$co=false;
+$timewes = date("i")+1;
+while(1) {
+
+if ( $timewes != date("i") ) {
+ $timewes = date("i");
+ if ( !fputs($socket,"PING :Alive\n") ) {
+  iferror("Can`t Put Something");
+ }
+}
+
+$ctime = time();
+//while($data = fgets($socket, 128)) {
+
+$data = fgets($socket, 128);
+
+ if ( $conf['debug'] == true ) {
+  //echo $data . "\n";
+  echo "<- " . $data . nl;
+ }
+  
+        flush();
+
+        // Separate all data
+        $ex = explode(' ', $data);
+
+	$wteskz = 0;
+	while ($wteskz < sizeof($ex)) {
+         eval('$w'.$wteskz.'=\''.$ex[$wteskz].'\';');
+	 $wteskz++;
+	}
+	
+        $ex2 = explode(':', $data);
+        if (isset($ex[3])) {
+           $command = str_replace(array(chr(10), chr(13)), '', $ex[3]);
+        }else{
+           $command = false;
+        }
+        if (isset($ex[4])) {
+	   $s1 = $ex[4];
+		$wteskz = 4+1;
+		while ($wteskz < sizeof($ex)) {
+		 $s1 = $s1 . ' ' . $ex[$wteskz];
+		 $wteskz++;
+		}
+           $s1 = str_replace(array(chr(10), chr(13)), '', $s1);
+	   //$s1 = str_replace(':','',$s1);
+	   $s1 = str_replace($command,'',$s1);
+        }else{
+           $s1 = false;
+        }
+
+        $command = str_replace(":","",$command);
+        //echo "----------------------------------------------";        
+        $wes      = explode("!",$ex[0]);
+        $wes['0'] = str_replace(":","",$wes['0']);
+        $nick     = $wes['0'];
+        $channel  = isset($ex[2]) ? $ex[2] : 'ERROR!';
+	      $channel  = str_replace(array(chr(10), chr(13)), '', $channel);
+        $chan     = $channel;
+        if(!isset($sa[$nick]))
+         $sa[$nick]=false;
+
+        $ccommand=str_replace(array(chr(10), chr(13)), '', $ex[0]);
+	if ($ccommand=="SERVER") {
+		$conf['wserver']=str_replace(array(chr(10), chr(13)), '', $ex[1]);
+		define('ALL','$' . $conf['wserver']);
+		echo "Got Server: " . $conf['wserver'] . nl;
+	}
+	if ($ccommand=="ERROR") {
+		$myerror = "Disconnected By Server. Debug: {$data}";
+		echo $myerror;
+		exit($myerror);
+	}
+        if(preg_match("/EOS/",$data)) {
+          if($co==false) {
+            echo "CONECTED" . nl;
+            send("EOS\n");
+            //send("NETINFO 100 ".$ctime." 2309 MD5:5b5c2b644bed192bfd723752767bfece 0 0 0 :DragonLichtChat.com\n");
+	           if ($conf['protectnick'] != false) {
+		          send("SQLINE ".$conf['protectnick']." :reserved 4 " . $conf['protectnick']);
+		          echo "Protected User \"" . $conf['protectnick'] . "\"" . nl;
+	           }
+	          makeuser("Service"); 
+            makeuser("GlobalService");
+            makeuser("NickService");
+            makeuser("ChanService");
+            
+            makeuser("OperService");
+            makeuser("WesService");
+            
+            sglobal("Service is up and running... (" . date ("H:i:s D d M Y") . ")");
+            $co=true;
+          }
+        }
+        
+        if($command == "exit" && isadmin($nick,$command)) {
+         echo "DIEDIEDIE!!!!".nl; //exit;
+         sglobal("Services Are Shutting Down By $nick");
+         exit;
+        }
+
+        if($command == "debug" && isadmin($nick,$command)) {
+        global $conf;
+        $conf['debug'] = true;
+        Send("wallops :Sesset Debug On");
+        echo "Setted Debug On".nl;
+        }
+
+        if($command == "!debug" && isadmin($nick,$command)) {
+        global $conf;
+        $conf['debug'] = false;
+        Send("wallops :Sesset Debug Off");
+        echo "Setted Debug Off".nl;
+        }
+
+        if($command == "make" && isadmin($nick,$command)) {
+                    $login  = explode(" ",$s1);
+                    $rando  = rand(1,5) . rand(1,5) . rand(1,5) . rand(1,5) . rand(1,5);
+                    $arrayw = array("nl","com","eu","co.au","de","it","net","nu","info","be","us","tk");
+                    $exz    = $arrayw[rand(0,sizeof($arrayw)-1)];
+                    send("nick {$login[0]} 1 {$ctime} {$login[0]} host{$rando}.{$exz} {$conf['sserver']} {$ctime} :PHP Service (F.u.)\n");
+                    send(":{$login[0]} MODE {$login[0]} +Sq\n");
+        }
+        
+        if(isset($ex[2]) && $ex[2] == $conf['protectnick'] && $conf['protectnick'] == $nick) {
+         global $loggedinuser;
+         if ($loggedinuser != true) {
+         $nn = 'Gast_' . rand(1,5) . rand(1,5) . rand(1,5) . rand(1,5) . rand(1,5);
+         svsnick($ex[2],$nn);
+         sendto($nn,'Do Not use this nick ;)');
+         }
+         else {
+         sendto($ex[2],'Your Session has bean deleted now.');
+         sendto($ex[2],'If U Rechange your name and set it back to "'.$ex[2].'".');
+         sendto($ex[2],'Then You Must Re-Logon.');
+         $loggedinuser=false;
+         }
+        }
+
+        if($command == "ID") {
+         $login = explode(" ",$s1);
+          if ($login[0] == $conf['protectnick'] && $login[1] == $conf['protectnickpass']) {
+            $nn = $login[0];
+            svsnick($nick,$nn);
+            sendto($nn,'Logged in!');
+            global $loggedinuser;
+            $loggedinuser = true;
+            echo "\"" . $nick . "\" Logged In As \"" . $login[0] . "\"" . nl;
+          }else{
+            send("kill ".$nick." :Failed Identify");
+          }
+        }
+
+        if ($command == "eval" && isadmin($nick,$ex[1])) {
+         ob_start();
+         $return = eval($s1);
+         $return = ob_get_contents();
+         ob_end_clean();
+         sendto($nick,$return);
+        }
+        
+        if($command == "test") {
+          sendto($nick,$w1 . '--' . $w2);
+        }
+
+        if($command == "all" && isadmin($nick,$command)) {
+          //send(":Service NOTICE " . ALL . " :" . $s1);
+          sglobal($s1);
+        }
+
+        if($command == "mode" && isadmin($nick,$command)) {
+          send(":Service MODE " . $s1);
+
+        }
+
+        if($command == "svsnick" && isadmin($nick,$command)) {
+          send("SVSNICK " . $s1 . " :".time());
+
+        }
+
+        if($command == "cmd" && isadmin($nick,$command)) {
+          send($s1);
+        }
+
+        if($command == "mirc" && isadmin($nick,$ex[1])) {
+          sendto($nick,'Menu nicklist,status,channel {');
+          sendto($nick,'  Service Menu');
+          sendto($nick,'  .$iif(V isin $usermode,Set Superadmin Off,Set Superadmin On):.msg service sa');
+          sendto($nick,'  .$iif(# isin $chan,Mode)');
+          sendto($nick,'  ..set Modes on $chan');
+          sendto($nick,'  ...Costum Modes:.msg service mode $chan $$?="Modes"');
+          sendto($nick,'  ..set Modes On $chan by $1');
+          sendto($nick,'  ...All');
+          sendto($nick,'  ....+qahov:.msg service mode $chan +qahov $1 $1 $1 $1 $1');
+          sendto($nick,'  ....-qahov:.msg service mode $chan -qahov $1 $1 $1 $1 $1');
+          sendto($nick,'  ...-');
+          sendto($nick,'  ...Owner');
+          sendto($nick,'  ....Owner:.msg service mode $chan +qo $1 $1');
+          sendto($nick,'  ....De-Owner:.msg service mode $chan -qo $1 $1');
+          sendto($nick,'  ...Admin');
+          sendto($nick,'  ....Admin:.msg service mode $chan +a $1');
+          sendto($nick,'  ....De-Admin:.msg service mode $chan -a $1');
+          sendto($nick,'  ...HalfOp');
+          sendto($nick,'  ....HalfOp:.msg service mode $chan +h $1');
+          sendto($nick,'  ....De-Halfop:.msg service mode $chan -h $1');
+          sendto($nick,'  ...Op');
+          sendto($nick,'  ....Op:.msg service mode $chan +o $1');
+          sendto($nick,'  ....De-Op:.msg service mode $chan -o $1');
+          sendto($nick,'  ...Voice');
+          sendto($nick,'  ....Voice:.msg service mode $chan +v $1');
+          sendto($nick,'  ....De-voice:.msg service mode $chan -v $1');
+          sendto($nick,'  ...-');
+          sendto($nick,'  ...Bot Mode');
+          sendto($nick,'  ....Set:.msg service mode $chan +ao $1 $1');
+          sendto($nick,'  ....Unset:.msg service mode $chan -ao $1 $1');
+          sendto($nick,'  ..set Modes on $1');
+          sendto($nick,'  ...Costum modes:.msg service cmd SVS2MODE $1 $$?="Modes"');
+          sendto($nick,'  ...Set $1 As Bot');
+          sendto($nick,'  ....Mark As Bot:.msg service cmd SVS2MODE $1 +B');
+          sendto($nick,'  ....Un-Mark As Bot:.msg service cmd SVS2MODE $1 +B');
+          sendto($nick,'  .Global:.msg service all $$?="Message"');
+          sendto($nick,'  .$iif($1,Change Nick Of $1):.msg service svsnick $1 $$?="New Nickname?"');
+          sendto($nick,'  .$iif($1,Let $1 Quit As)');
+          sendto($nick,'  ..Connection Reset by peer:.msg service cmd svskill $$1 :Connection reset by peer');
+          sendto($nick,'  ..Ping Timeout:.msg service cmd svskill $$1 :Ping timeout');
+          sendto($nick,'  ..Unknown Error [1050]:.msg service cmd svskill $$1 :Unknown Error [1050]');
+          sendto($nick,'  ..Banned:.msg service cmd svskill $$1 :User has been banned from this server');
+          sendto($nick,'  ..Broken pipe:.msg service cmd svskill $$1 :Broken pipe');
+          sendto($nick,'  ..User Defined:.msg service cmd svskill $$1 : $+ $$?="Quit Reason 4 $1"');
+          sendto($nick,'}');
+        }
+
+        if($command == "sa" || $command == "superadmin") {
+         if(isadmin($nick,$ex[1])) {
+           if ($sa[$nick]==true) { 
+            $sa[$nick]=false;
+           }else{
+            $sa[$nick]=true;
+           }
+           $saonoroff = ($sa[$nick]==true)?'Now':'Not Longer';
+           $onoroffsa = ($sa[$nick]==true)?'+V':'-V';
+           sendto($nick,"You`re {$saonoroff} A SuperAdmin","NOTICE");
+           send("svs2mode {$nick} {$onoroffsa}");
+         }
+        }
+        
+        if(isset($ex[1]) && isadmin($nick,$ex[1]) && $ex[1] == "JOIN") {
+	       if ($sa[$nick] == true) {
+	        send(":Service MODE " . $channel . " +oq " . $nick . ' ' . $nick);
+	       }
+	      }
+
+        if($ex[0] == "PING"){
+          send("PONG ".$ex[1]."\n");
+        }
+        
+        //if($ex[0] == "") { exit('Got No Data!') ;}
+        //if ($ccommand=="") { exit('Got No Data!') ;}
+        unset ($data,$ex2,$ex,$ctime,$user);
+}
+?>
