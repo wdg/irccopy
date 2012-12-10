@@ -2,21 +2,21 @@
 /*
 link            services.woc
 {
-	username	*;
-	hostname 	82.95.199.96;
-	bind-ip 	*;
-	port 		  6667;
-	hub             *;
-	password-connect "bl44t";
-	password-receive "bl44t";
-	class           servers;
-		options {
-		};
+    username    *;
+    hostname    82.95.199.96;
+    bind-ip     *;
+    port          6667;
+    hub             *;
+    password-connect "bl44t";
+    password-receive "bl44t";
+    class           servers;
+        options {
+        };
 };
 
 
 ulines {
-	services.woc;
+    services.woc;
 };
 */
   error_reporting(E_ALL);    // alle error`s laten zien
@@ -151,12 +151,12 @@ $data = fgets($socket, 128);
         // Separate all data
         $ex = explode(' ', $data);
 
-	$wteskz = 0;
-	while ($wteskz < sizeof($ex)) {
+    $wteskz = 0;
+    while ($wteskz < sizeof($ex)) {
          eval('$w'.$wteskz.'=\''.$ex[$wteskz].'\';');
-	 $wteskz++;
-	}
-	
+     $wteskz++;
+    }
+    
         $ex2 = explode(':', $data);
         if (isset($ex[3])) {
            $command = str_replace(array(chr(10), chr(13)), '', $ex[3]);
@@ -164,15 +164,15 @@ $data = fgets($socket, 128);
            $command = false;
         }
         if (isset($ex[4])) {
-	   $s1 = $ex[4];
-		$wteskz = 4+1;
-		while ($wteskz < sizeof($ex)) {
-		 $s1 = $s1 . ' ' . $ex[$wteskz];
-		 $wteskz++;
-		}
+       $s1 = $ex[4];
+        $wteskz = 4+1;
+        while ($wteskz < sizeof($ex)) {
+         $s1 = $s1 . ' ' . $ex[$wteskz];
+         $wteskz++;
+        }
            $s1 = str_replace(array(chr(10), chr(13)), '', $s1);
-	   //$s1 = str_replace(':','',$s1);
-	   $s1 = str_replace($command,'',$s1);
+       //$s1 = str_replace(':','',$s1);
+       $s1 = str_replace($command,'',$s1);
         }else{
            $s1 = false;
         }
@@ -183,32 +183,32 @@ $data = fgets($socket, 128);
         $wes['0'] = str_replace(":","",$wes['0']);
         $nick     = $wes['0'];
         $channel  = isset($ex[2]) ? $ex[2] : 'ERROR!';
-	      $channel  = str_replace(array(chr(10), chr(13)), '', $channel);
+          $channel  = str_replace(array(chr(10), chr(13)), '', $channel);
         $chan     = $channel;
         if(!isset($sa[$nick]))
          $sa[$nick]=false;
 
         $ccommand=str_replace(array(chr(10), chr(13)), '', $ex[0]);
-	if ($ccommand=="SERVER") {
-		$conf['wserver']=str_replace(array(chr(10), chr(13)), '', $ex[1]);
-		define('ALL','$' . $conf['wserver']);
-		echo "Got Server: " . $conf['wserver'] . nl;
-	}
-	if ($ccommand=="ERROR") {
-		$myerror = "Disconnected By Server. Debug: {$data}";
-		echo $myerror;
-		exit($myerror);
-	}
+    if ($ccommand=="SERVER") {
+        $conf['wserver']=str_replace(array(chr(10), chr(13)), '', $ex[1]);
+        define('ALL','$' . $conf['wserver']);
+        echo "Got Server: " . $conf['wserver'] . nl;
+    }
+    if ($ccommand=="ERROR") {
+        $myerror = "Disconnected By Server. Debug: {$data}";
+        echo $myerror;
+        exit($myerror);
+    }
         if(preg_match("/EOS/",$data)) {
           if($co==false) {
             echo "CONECTED" . nl;
             send("EOS\n");
             //send("NETINFO 100 ".$ctime." 2309 MD5:5b5c2b644bed192bfd723752767bfece 0 0 0 :DragonLichtChat.com\n");
-	           if ($conf['protectnick'] != false) {
-		          send("SQLINE ".$conf['protectnick']." :reserved 4 " . $conf['protectnick']);
-		          echo "Protected User \"" . $conf['protectnick'] . "\"" . nl;
-	           }
-	          makeuser("Service"); 
+               if ($conf['protectnick'] != false) {
+                  send("SQLINE ".$conf['protectnick']." :reserved 4 " . $conf['protectnick']);
+                  echo "Protected User \"" . $conf['protectnick'] . "\"" . nl;
+               }
+              makeuser("Service"); 
             makeuser("GlobalService");
             makeuser("NickService");
             makeuser("ChanService");
@@ -373,10 +373,10 @@ $data = fgets($socket, 128);
         }
         
         if(isset($ex[1]) && isadmin($nick,$ex[1]) && $ex[1] == "JOIN") {
-	       if ($sa[$nick] == true) {
-	        send(":Service MODE " . $channel . " +oq " . $nick . ' ' . $nick);
-	       }
-	      }
+           if ($sa[$nick] == true) {
+            send(":Service MODE " . $channel . " +oq " . $nick . ' ' . $nick);
+           }
+          }
 
         if($ex[0] == "PING"){
           send("PONG ".$ex[1]."\n");
